@@ -1,0 +1,2155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A-SERIES Publishing - Educational Textbooks for JUPEB Students</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        /* CSS Variables */
+        :root {
+            --primary-blue: #0066FF;
+            --secondary-blue: #00C6FF;
+            --primary-purple: #8B5CF6;
+            --secondary-purple: #EC4899;
+            --primary-orange: #FF6B6B;
+            --secondary-orange: #FFD93D;
+            --dark-text: #333333;
+            --light-text: #ffffff;
+            --gray-bg: #f8f9fa;
+            --gray-border: #e9ecef;
+            --success: #28a745;
+            --danger: #dc3545;
+            --warning: #ffc107;
+            --shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+
+        /* Reset and Base Styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--dark-text);
+            background-color: #ffffff;
+            overflow-x: hidden;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-weight: 700;
+            line-height: 1.2;
+            margin-bottom: 1rem;
+        }
+
+        p {
+            margin-bottom: 1rem;
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        ul {
+            list-style: none;
+        }
+
+        img {
+            max-width: 100%;
+            height: auto;
+        }
+
+        button {
+            cursor: pointer;
+            border: none;
+            outline: none;
+            font-family: inherit;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1.5rem;
+        }
+
+        .section {
+            padding: 5rem 0;
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 3rem;
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, var(--primary-blue), var(--primary-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 0.8rem 1.8rem;
+            border-radius: 50px;
+            font-weight: 600;
+            text-align: center;
+            transition: var(--transition);
+            box-shadow: var(--shadow);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
+            color: var(--light-text);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(0, 102, 255, 0.4);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, var(--primary-purple), var(--secondary-purple));
+            color: var(--light-text);
+        }
+
+        .btn-secondary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(139, 92, 246, 0.4);
+        }
+
+        .btn-accent {
+            background: linear-gradient(135deg, var(--primary-orange), var(--secondary-orange));
+            color: var(--dark-text);
+        }
+
+        .btn-accent:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(255, 107, 107, 0.4);
+        }
+
+        .gradient-bg {
+            background: linear-gradient(135deg, var(--primary-blue), var(--primary-purple));
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            transition: var(--transition);
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        /* Header & Navigation */
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            transition: var(--transition);
+        }
+
+        .header-scrolled {
+            padding: 0.5rem 0;
+        }
+
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary-blue), var(--primary-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .nav-links a {
+            font-weight: 600;
+            transition: var(--transition);
+            position: relative;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary-blue);
+        }
+
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
+            transition: var(--transition);
+        }
+
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .cart-icon {
+            position: relative;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--dark-text);
+            transition: var(--transition);
+        }
+
+        .cart-icon:hover {
+            color: var(--primary-blue);
+        }
+
+        .cart-count {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: var(--primary-orange);
+            color: white;
+            font-size: 0.7rem;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+        }
+
+        .contact-btn {
+            background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
+            color: white;
+            padding: 0.6rem 1.2rem;
+            border-radius: 50px;
+            font-weight: 600;
+            transition: var(--transition);
+        }
+
+        .contact-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 102, 255, 0.3);
+        }
+
+        .mobile-menu-btn {
+            display: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--dark-text);
+        }
+
+        /* Hero Section */
+        .hero {
+            padding: 10rem 0 5rem;
+            background: linear-gradient(135deg, rgba(0, 102, 255, 0.05), rgba(139, 92, 246, 0.05));
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -20%;
+            width: 600px;
+            height: 600px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, rgba(0, 198, 255, 0.1), rgba(139, 92, 246, 0.1));
+            z-index: -1;
+        }
+
+        .hero-content {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 3rem;
+        }
+
+        .hero-text {
+            flex: 1;
+        }
+
+        .hero-title {
+            font-size: 3.5rem;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(135deg, var(--primary-blue), var(--primary-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            line-height: 1.1;
+        }
+
+        .hero-subtitle {
+            font-size: 1.2rem;
+            color: #666;
+            margin-bottom: 2rem;
+            max-width: 600px;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+       .hero-image {
+    flex: 1;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.hero-image img {
+    max-width: 100%;
+    max-height: 500px;
+    height: auto;
+    width: auto;
+    border-radius: 12px;
+    box-shadow: var(--shadow);
+    object-fit: contain;
+}
+
+        /* Books Section */
+        .books {
+            background: var(--gray-bg);
+        }
+
+        .books-filter {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .filter-btn {
+            padding: 0.6rem 1.5rem;
+            border-radius: 50px;
+            background: white;
+            color: var(--dark-text);
+            font-weight: 600;
+            transition: var(--transition);
+            box-shadow: var(--shadow);
+        }
+
+        .filter-btn.active {
+            background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
+            color: white;
+        }
+
+        .books-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 2rem;
+        }
+
+        .book-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+        }
+
+        .book-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .book-image {
+            height: 250px;
+            background: #f8f9fa;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #999;
+            font-size: 1rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .book-details {
+            padding: 1.5rem;
+        }
+
+        .book-title {
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+            color: var(--dark-text);
+        }
+
+        .book-author {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+
+        .book-price {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .current-price {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--primary-blue);
+        }
+
+        .original-price {
+            font-size: 1rem;
+            color: #999;
+            text-decoration: line-through;
+        }
+
+        .discount-badge {
+            background: var(--primary-orange);
+            color: white;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .book-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .add-to-cart {
+            flex: 1;
+            background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
+            color: white;
+            padding: 0.7rem;
+            border-radius: 6px;
+            font-weight: 600;
+            transition: var(--transition);
+        }
+
+        .add-to-cart:hover {
+            background: linear-gradient(135deg, var(--secondary-blue), var(--primary-blue));
+        }
+
+        .quick-view {
+            background: var(--gray-border);
+            color: var(--dark-text);
+            padding: 0.7rem;
+            border-radius: 6px;
+            transition: var(--transition);
+        }
+
+        .quick-view:hover {
+            background: #ddd;
+        }
+
+        /* Features Section */
+        .features {
+            background: white;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+        }
+
+        .feature-card {
+            text-align: center;
+            padding: 2rem 1rem;
+            border-radius: 12px;
+            transition: var(--transition);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow);
+        }
+
+        .feature-icon {
+            width: 70px;
+            height: 70px;
+            margin: 0 auto 1.5rem;
+            background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.8rem;
+        }
+
+        .feature-title {
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            color: var(--dark-text);
+        }
+
+        .feature-description {
+            color: #666;
+        }
+
+        /* Testimonials Section */
+        .testimonials {
+            background: linear-gradient(135deg, rgba(0, 102, 255, 0.05), rgba(139, 92, 246, 0.05));
+        }
+
+        .testimonials-container {
+            max-width: 800px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .testimonial-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            text-align: center;
+            margin: 0 1rem;
+        }
+
+        .testimonial-text {
+            font-style: italic;
+            margin-bottom: 1.5rem;
+            color: #555;
+        }
+
+        .testimonial-author {
+            font-weight: 600;
+            color: var(--dark-text);
+        }
+
+        .testimonial-role {
+            color: #777;
+            font-size: 0.9rem;
+        }
+
+        .testimonial-nav {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .testimonial-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #ddd;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .testimonial-dot.active {
+            background: var(--primary-blue);
+        }
+
+        /* FAQ Section */
+        .faq {
+            background: white;
+        }
+
+        .faq-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .faq-item {
+            margin-bottom: 1rem;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .faq-question {
+            padding: 1.5rem;
+            background: var(--gray-bg);
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: var(--transition);
+        }
+
+        .faq-question:hover {
+            background: #e9ecef;
+        }
+
+        .faq-answer {
+            padding: 0 1.5rem;
+            max-height: 0;
+            overflow: hidden;
+            transition: var(--transition);
+        }
+
+        .faq-answer.active {
+            padding: 1.5rem;
+            max-height: 500px;
+        }
+
+        .faq-toggle {
+            font-size: 1.2rem;
+            transition: var(--transition);
+        }
+
+        .faq-toggle.active {
+            transform: rotate(45deg);
+        }
+
+        /* Contact Section */
+        .contact {
+            background: linear-gradient(135deg, rgba(0, 102, 255, 0.05), rgba(139, 92, 246, 0.05));
+        }
+
+        .contact-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 3rem;
+        }
+
+        .contact-info {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+
+        .contact-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        .contact-details h3 {
+            margin-bottom: 0.5rem;
+        }
+
+        /* Footer */
+        footer {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            color: white;
+            padding: 4rem 0 2rem;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 3rem;
+            margin-bottom: 3rem;
+        }
+
+        .footer-column h3 {
+            font-size: 1.3rem;
+            margin-bottom: 1.5rem;
+            color: white;
+        }
+
+        .footer-links {
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+        }
+
+        .footer-links a {
+            color: #ccc;
+            transition: var(--transition);
+        }
+
+        .footer-links a:hover {
+            color: white;
+            padding-left: 5px;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .social-link {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+        }
+
+        .social-link:hover {
+            background: var(--primary-blue);
+            transform: translateY(-3px);
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: #aaa;
+            font-size: 0.9rem;
+        }
+
+        /* Cart Sidebar */
+        .cart-sidebar {
+            position: fixed;
+            top: 0;
+            right: -400px;
+            width: 100%;
+            max-width: 400px;
+            height: 100vh;
+            background: white;
+            box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
+            z-index: 1100;
+            transition: var(--transition);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .cart-sidebar.active {
+            right: 0;
+        }
+
+        .cart-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--gray-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .cart-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+        }
+
+        .close-cart {
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #666;
+            transition: var(--transition);
+        }
+
+        .close-cart:hover {
+            color: var(--danger);
+        }
+
+        .cart-items {
+            flex: 1;
+            padding: 1.5rem;
+            overflow-y: auto;
+        }
+
+        .cart-item {
+            display: flex;
+            gap: 1rem;
+            padding: 1rem 0;
+            border-bottom: 1px solid var(--gray-border);
+        }
+
+        .cart-item-image {
+            width: 80px;
+            height: 100px;
+            background: #f0f0f0;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #999;
+            font-size: 0.8rem;
+            flex-shrink: 0;
+        }
+
+        .cart-item-details {
+            flex: 1;
+        }
+
+        .cart-item-title {
+            font-weight: 600;
+            margin-bottom: 0.3rem;
+        }
+
+        .cart-item-author {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .cart-item-price {
+            font-weight: 700;
+            color: var(--primary-blue);
+            margin-bottom: 0.5rem;
+        }
+
+        .cart-item-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .quantity-btn {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: var(--gray-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .quantity-btn:hover {
+            background: #ddd;
+        }
+
+        .quantity-value {
+            min-width: 30px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .remove-item {
+            color: var(--danger);
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: var(--transition);
+            margin-left: auto;
+        }
+
+        .remove-item:hover {
+            text-decoration: underline;
+        }
+
+        .cart-footer {
+            padding: 1.5rem;
+            border-top: 1px solid var(--gray-border);
+        }
+
+        .cart-total {
+            display: flex;
+            justify-content: space-between;
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+        }
+
+        .cart-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+        }
+
+        .whatsapp-btn {
+            background: linear-gradient(135deg, #25D366, #128C7E);
+            color: white;
+            padding: 1rem;
+            border-radius: 6px;
+            font-weight: 600;
+            text-align: center;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .whatsapp-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(37, 211, 102, 0.3);
+        }
+
+        .empty-cart {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: #666;
+        }
+
+        .empty-cart i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: #ddd;
+        }
+
+        /* Overlay */
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1050;
+            opacity: 0;
+            visibility: hidden;
+            transition: var(--transition);
+        }
+
+        .overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* Modal */
+        .modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.9);
+            width: 90%;
+            max-width: 500px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            z-index: 1100;
+            opacity: 0;
+            visibility: hidden;
+            transition: var(--transition);
+        }
+
+        .modal.active {
+            opacity: 1;
+            visibility: visible;
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .modal-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid var(--gray-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+        }
+
+        .close-modal {
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #666;
+            transition: var(--transition);
+        }
+
+        .close-modal:hover {
+            color: var(--danger);
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+        }
+
+        .modal-footer {
+            padding: 1.5rem;
+            border-top: 1px solid var(--gray-border);
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+        }
+
+        /* Back to Top Button */
+        .back-to-top {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            box-shadow: var(--shadow);
+            cursor: pointer;
+            z-index: 100;
+            opacity: 0;
+            visibility: hidden;
+            transition: var(--transition);
+        }
+
+        .back-to-top.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .back-to-top:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(0, 102, 255, 0.4);
+        }
+
+        /* Loading Spinner */
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-left-color: var(--primary-blue);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Toast Notifications */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 1rem 1.5rem;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            z-index: 1200;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            opacity: 0;
+            visibility: hidden;
+            transition: var(--transition);
+        }
+
+        .toast.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .toast.success {
+            border-left: 4px solid var(--success);
+        }
+
+        .toast.error {
+            border-left: 4px solid var(--danger);
+        }
+
+        .toast-icon {
+            font-size: 1.5rem;
+        }
+
+        .toast.success .toast-icon {
+            color: var(--success);
+        }
+
+        .toast.error .toast-icon {
+            color: var(--danger);
+        }
+
+        .toast-message {
+            font-weight: 600;
+        }
+
+        /* Mobile Sticky Cart */
+        .mobile-cart-btn {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, var(--primary-blue), var(--secondary-blue));
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            font-weight: 600;
+            box-shadow: 0 5px 15px rgba(0, 102, 255, 0.4);
+            z-index: 100;
+            display: none;
+            align-items: center;
+            gap: 0.5rem;
+            transition: var(--transition);
+        }
+
+        .mobile-cart-btn:hover {
+            transform: translateX(-50%) translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 102, 255, 0.5);
+        }
+
+        /* Responsive Styles */
+        @media (max-width: 992px) {
+            .hero-content {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .hero-title {
+                font-size: 2.8rem;
+            }
+            
+            .section-title {
+                font-size: 2.2rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .navbar {
+                padding: 1rem 0;
+            }
+            
+            .nav-links {
+                position: fixed;
+                top: 70px;
+                left: 0;
+                width: 100%;
+                background: white;
+                flex-direction: column;
+                padding: 2rem;
+                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+                transform: translateY(-100%);
+                opacity: 0;
+                visibility: hidden;
+                transition: var(--transition);
+                z-index: 999;
+            }
+            
+            .nav-links.active {
+                transform: translateY(0);
+                opacity: 1;
+                visibility: visible;
+            }
+            
+            .mobile-menu-btn {
+                display: block;
+            }
+            
+            .hero {
+                padding: 8rem 0 4rem;
+            }
+            
+            .hero-title {
+                font-size: 2.5rem;
+            }
+            
+            .section {
+                padding: 4rem 0;
+            }
+            
+            .cart-sidebar {
+                max-width: 100%;
+            }
+            
+            .mobile-cart-btn {
+                display: flex;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .container {
+                padding: 0 1rem;
+            }
+            
+            .hero-title {
+                font-size: 2rem;
+            }
+            
+            .hero-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .btn {
+                width: 100%;
+                max-width: 250px;
+            }
+            
+            .books-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .features-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .contact-container {
+                grid-template-columns: 1fr;
+            }
+            
+            .footer-content {
+                grid-template-columns: 1fr;
+                gap: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header & Navigation -->
+    <header id="header">
+        <div class="container">
+            <nav class="navbar">
+                <a href="#" class="logo">A-SERIES</a>
+                
+                <ul class="nav-links">
+                    <li><a href="#home">Home</a></li>
+                    <li><a href="#books">Books</a></li>
+                    <li><a href="#features">Why A-Series</a></li>
+                    <li><a href="#testimonials">Testimonials</a></li>
+                    <li><a href="#faq">FAQ</a></li>
+                    <li><a href="#contact">Contact</a></li>
+                </ul>
+                
+                <div class="nav-actions">
+                    <div class="cart-icon" id="cartIcon">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span class="cart-count" id="cartCount">0</span>
+                    </div>
+                    <a href="#contact" class="contact-btn">Contact Us</a>
+                    <div class="mobile-menu-btn" id="mobileMenuBtn">
+                        <i class="fas fa-bars"></i>
+                    </div>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero" id="home">
+        <div class="container">
+            <div class="hero-content">
+                <div class="hero-text">
+                    <h1 class="hero-title">Excel in JUPEB with A-SERIES Textbooks</h1>
+                    <p class="hero-subtitle">Comprehensive, easy-to-understand educational textbooks designed specifically for JUPEB students. Written by experienced educators to help you achieve academic excellence.</p>
+                    <div class="hero-buttons">
+                        <a href="#books" class="btn btn-primary">Browse Books</a>
+                        <a href="#contact" class="btn btn-secondary">Contact Us</a>
+                    </div>
+                </div>
+               <div class="hero-image">
+    <img src="https://i.ibb.co/zVBnXYhy/aseries.jpg" alt="A-SERIES Textbook Collection" style="max-width: 100%; height: auto; border-radius: 12px; box-shadow: var(--shadow);">
+</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Books Section -->
+    <section class="section books" id="books">
+        <div class="container">
+            <h2 class="section-title">Our Book Collection</h2>
+            
+            <div class="books-filter">
+                <button class="filter-btn active" data-filter="all">All Books</button>
+                <button class="filter-btn" data-filter="subject">Subject Books</button>
+                <button class="filter-btn" data-filter="past">Past Questions</button>
+            </div>
+            
+            <div class="books-grid" id="booksGrid">
+                <!-- Books will be dynamically loaded here -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="section features" id="features">
+        <div class="container">
+            <h2 class="section-title">Why Choose A-SERIES</h2>
+            
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-graduation-cap"></i>
+                    </div>
+                    <h3 class="feature-title">Expert Authors</h3>
+                    <p class="feature-description">Our textbooks are written by experienced educators with deep knowledge of the JUPEB curriculum.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-book-open"></i>
+                    </div>
+                    <h3 class="feature-title">Comprehensive Content</h3>
+                    <p class="feature-description">Cover all topics in the syllabus with clear explanations and practical examples.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <h3 class="feature-title">Exam-Focused</h3>
+                    <p class="feature-description">Specifically designed to help you excel in JUPEB examinations with past questions and practice exercises.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-shipping-fast"></i>
+                    </div>
+                    <h3 class="feature-title">Fast Delivery</h3>
+                    <p class="feature-description">We deliver nationwide with reliable shipping partners to get your books to you quickly.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Testimonials Section -->
+    <section class="section testimonials" id="testimonials">
+        <div class="container">
+            <h2 class="section-title">What Students Say</h2>
+            
+            <div class="testimonials-container">
+                <div class="testimonial-card">
+                    <p class="testimonial-text">"The A-SERIES Biology textbook made complex topics so easy to understand. I went from struggling to scoring A's in my mock exams!"</p>
+                    <h4 class="testimonial-author">Chinwe O.</h4>
+                    <p class="testimonial-role">JUPEB Student</p>
+                </div>
+                
+                <div class="testimonial-nav">
+                    <div class="testimonial-dot active"></div>
+                    <div class="testimonial-dot"></div>
+                    <div class="testimonial-dot"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ Section -->
+    <section class="section faq" id="faq">
+        <div class="container">
+            <h2 class="section-title">Frequently Asked Questions</h2>
+            
+            <div class="faq-container">
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <span>How long does delivery take?</span>
+                        <i class="fas fa-plus faq-toggle"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Delivery typically takes 3-5 business days for major cities and 5-7 business days for other locations. We use reliable courier services to ensure your books arrive safely and on time.</p>
+                    </div>
+                </div>
+                
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <span>Do you offer discounts for bulk orders?</span>
+                        <i class="fas fa-plus faq-toggle"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Yes, we offer special discounts for schools and students ordering multiple books. Please contact us directly for bulk order pricing.</p>
+                    </div>
+                </div>
+                
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <span>Are the books updated to the latest curriculum?</span>
+                        <i class="fas fa-plus faq-toggle"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Yes, all our textbooks are regularly updated to align with the latest JUPEB curriculum and examination patterns.</p>
+                    </div>
+                </div>
+                
+                <div class="faq-item">
+                    <div class="faq-question">
+                        <span>How do I place an order?</span>
+                        <i class="fas fa-plus faq-toggle"></i>
+                    </div>
+                    <div class="faq-answer">
+                        <p>Simply add books to your cart and click the "Order via WhatsApp" button. This will open WhatsApp where you can send us your order details. All orders are processed through WhatsApp.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section class="section contact" id="contact">
+        <div class="container">
+            <h2 class="section-title">Get In Touch</h2>
+            
+            <div class="contact-container">
+                <div class="contact-info">
+                    <div class="contact-item">
+                        <div class="contact-icon">
+                            <i class="fas fa-phone"></i>
+                        </div>
+                        <div class="contact-details">
+                            <h3>Phone</h3>
+                            <p><a href="tel:+2349169384267">+234 916 938 4267</a></p>
+                        </div>
+                    </div>
+                    
+                    <div class="contact-item">
+                        <div class="contact-icon">
+                            <i class="fab fa-whatsapp"></i>
+                        </div>
+                        <div class="contact-details">
+                            <h3>WhatsApp</h3>
+                            <p><a href="https://wa.me/2349169384267" target="_blank">+234 916 938 4267</a></p>
+                        </div>
+                    </div>
+                    
+                    <div class="contact-item">
+                        <div class="contact-icon">
+                            <i class="fas fa-envelope"></i>
+                        </div>
+                        <div class="contact-details">
+                            <h3>Email</h3>
+                            <p><a href="mailto:info@aseriespublishing.com">info@aseriespublishing.com</a></p>
+                        </div>
+                    </div>
+                    
+                    <div class="contact-item">
+                        <div class="contact-icon">
+                            <i class="fas fa-map-marker-alt"></i>
+                        </div>
+                        <div class="contact-details">
+                            <h3>Address</h3>
+                            <p>Lagos, Nigeria</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="contact-info">
+                    <h3>How to Order</h3>
+                    <p>All orders are processed through WhatsApp for faster response and better customer service.</p>
+                    <ol style="margin-left: 1.5rem; margin-top: 1rem;">
+                        <li>Browse our book collection</li>
+                        <li>Add books to your cart</li>
+                        <li>Click "Order via WhatsApp"</li>
+                        <li>Send your order details via WhatsApp</li>
+                        <li>We'll confirm your order and arrange delivery</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-column">
+                    <h3>A-SERIES Publishing</h3>
+                    <p>Providing quality educational textbooks for JUPEB students to achieve academic excellence.</p>
+                    <div class="social-links">
+                        <a href="#" class="social-link"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-instagram"></i></a>
+                        <a href="#" class="social-link"><i class="fab fa-linkedin-in"></i></a>
+                    </div>
+                </div>
+                
+                <div class="footer-column">
+                    <h3>Quick Links</h3>
+                    <ul class="footer-links">
+                        <li><a href="#home">Home</a></li>
+                        <li><a href="#books">Books</a></li>
+                        <li><a href="#features">Why A-Series</a></li>
+                        <li><a href="#testimonials">Testimonials</a></li>
+                        <li><a href="#faq">FAQ</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-column">
+                    <h3>Contact Info</h3>
+                    <ul class="footer-links">
+                        <li><a href="tel:+2349169384267"><i class="fas fa-phone"></i> +234 916 938 4267</a></li>
+                        <li><a href="https://wa.me/2349169384267" target="_blank"><i class="fab fa-whatsapp"></i> +234 916 938 4267</a></li>
+                        <li><a href="mailto:info@aseriespublishing.com"><i class="fas fa-envelope"></i> info@aseriespublishing.com</a></li>
+                        <li><i class="fas fa-map-marker-alt"></i> Lagos, Nigeria</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2023 A-SERIES Publishing. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Cart Sidebar -->
+    <div class="cart-sidebar" id="cartSidebar">
+        <div class="cart-header">
+            <h3 class="cart-title">Your Cart</h3>
+            <div class="close-cart" id="closeCart">
+                <i class="fas fa-times"></i>
+            </div>
+        </div>
+        
+        <div class="cart-items" id="cartItems">
+            <!-- Cart items will be dynamically loaded here -->
+        </div>
+        
+        <div class="cart-footer">
+            <div class="cart-total">
+                <span>Total:</span>
+                <span id="cartTotal">₦0</span>
+            </div>
+            
+            <div class="cart-buttons">
+                <a href="#" class="whatsapp-btn" id="whatsappBtn">
+                    <i class="fab fa-whatsapp"></i> Order via WhatsApp
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Overlay -->
+    <div class="overlay" id="overlay"></div>
+
+    <!-- Success Modal -->
+    <div class="modal" id="successModal">
+        <div class="modal-header">
+            <h3 class="modal-title">Order Sent!</h3>
+            <div class="close-modal" id="closeSuccessModal">
+                <i class="fas fa-times"></i>
+            </div>
+        </div>
+        
+        <div class="modal-body">
+            <div style="text-align: center;">
+                <i class="fab fa-whatsapp" style="font-size: 4rem; color: #25D366; margin-bottom: 1.5rem;"></i>
+                <h3 style="margin-bottom: 1rem;">Your order has been sent to WhatsApp!</h3>
+                <p>We will contact you shortly to confirm your order details and arrange delivery.</p>
+                <p style="margin-top: 1rem;"><strong>Order Number:</strong> <span id="orderNumber"></span></p>
+            </div>
+        </div>
+        
+        <div class="modal-footer">
+            <button class="btn btn-primary" id="closeSuccessBtn">Continue Shopping</button>
+        </div>
+    </div>
+
+    <!-- Back to Top Button -->
+    <div class="back-to-top" id="backToTop">
+        <i class="fas fa-arrow-up"></i>
+    </div>
+
+    <!-- Mobile Sticky Cart Button -->
+    <div class="mobile-cart-btn" id="mobileCartBtn">
+        <i class="fas fa-shopping-cart"></i>
+        <span>View Cart (<span id="mobileCartCount">0</span>)</span>
+    </div>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast">
+        <div class="toast-icon">
+            <i class="fas fa-check-circle"></i>
+        </div>
+        <div class="toast-message" id="toastMessage">Item added to cart!</div>
+    </div>
+
+    <script>
+        // =============================================
+        // SUPABASE CONFIGURATION
+        // =============================================
+        const SUPABASE_URL = 'https://raxwmwnlckisylacrvju.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJheHdtd25sY2tpc3lsYWNydmp1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI2ODY2NzgsImV4cCI6MjA3ODI2MjY3OH0.qVpD1R6yTY5wIPbbNRvN7LdUQjCqfwXTk7-KPeuJQF4';
+
+        // Initialize Supabase client
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // =============================================
+        // APPLICATION DATA
+        // =============================================
+        const books = [
+            {
+                id: 1,
+                title: "A-SERIES JUPEB BIOLOGY (1st Edition)",
+                author: "Kennis Kalu Dede",
+                price: 6000,
+                category: "subject",
+                image: "https://i.ibb.co/q3nRZcVH/biology-cover.jpg"
+            },
+            {
+                id: 2,
+                title: "A-SERIES JUPEB PHYSICS (1st Edition)",
+                author: "Kennis Kalu Dede",
+                price: 6000,
+                category: "subject",
+                image: "https://i.ibb.co/HfLDyg47/physics-cover.jpg"
+            },
+            {
+                id: 3,
+                title: "A-SERIES JUPEB CHEMISTRY (1st Edition)",
+                author: "Kennis Kalu Dede",
+                price: 7000,
+                category: "subject",
+                image: "https://i.ibb.co/vCPMLQtQ/chemistry-cover.jpg"
+            },
+            {
+                id: 4,
+                title: "A-SERIES JUPEB PAST QUESTION - CHM, PHY, BIO (3-in-1 for Science Students)",
+                author: "Kennis Kalu Dede",
+                price: 7000,
+                preorderPrice: 6000,
+                category: "past",
+                image: "https://i.ibb.co/F4w4yct5/past-questions-science.jpg"
+            },
+            {
+                id: 5,
+                title: "A-SERIES JUPEB PAST QUESTION - CHM, PHY, MAT (3-in-1 for Engineering Students)",
+                author: "Kennis Kalu Dede & Micheal I.",
+                price: 7000,
+                preorderPrice: 6000,
+                category: "past",
+                image: "https://i.ibb.co/jPTzRHxy/past-questions-engineering.jpg"
+            }
+        ];
+
+        // =============================================
+        // GLOBAL VARIABLES
+        // =============================================
+        let cart = JSON.parse(localStorage.getItem('aseries_cart')) || [];
+        let preorderActive = true;
+
+        // =============================================
+        // DOM ELEMENTS
+        // =============================================
+        const domElements = {
+            // Navigation
+            header: document.getElementById('header'),
+            mobileMenuBtn: document.getElementById('mobileMenuBtn'),
+            navLinks: document.querySelector('.nav-links'),
+            
+            // Cart
+            cartIcon: document.getElementById('cartIcon'),
+            cartCount: document.getElementById('cartCount'),
+            cartSidebar: document.getElementById('cartSidebar'),
+            closeCart: document.getElementById('closeCart'),
+            cartItems: document.getElementById('cartItems'),
+            cartTotal: document.getElementById('cartTotal'),
+            whatsappBtn: document.getElementById('whatsappBtn'),
+            mobileCartBtn: document.getElementById('mobileCartBtn'),
+            mobileCartCount: document.getElementById('mobileCartCount'),
+            
+            // Overlay
+            overlay: document.getElementById('overlay'),
+            
+            // Books
+            booksGrid: document.getElementById('booksGrid'),
+            filterBtns: document.querySelectorAll('.filter-btn'),
+            
+            // FAQ
+            faqQuestions: document.querySelectorAll('.faq-question'),
+            
+            // Modals
+            successModal: document.getElementById('successModal'),
+            closeSuccessModal: document.getElementById('closeSuccessModal'),
+            closeSuccessBtn: document.getElementById('closeSuccessBtn'),
+            orderNumber: document.getElementById('orderNumber'),
+            
+            // Back to top
+            backToTop: document.getElementById('backToTop'),
+            
+            // Toast
+            toast: document.getElementById('toast'),
+            toastMessage: document.getElementById('toastMessage')
+        };
+
+        // =============================================
+        // INITIALIZATION
+        // =============================================
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeApp();
+        });
+
+        function initializeApp() {
+            // Load books
+            renderBooks();
+            
+            // Initialize cart
+            updateCart();
+            
+            // Initialize event listeners
+            initializeEventListeners();
+        }
+
+        // =============================================
+        // BOOKS RENDERING AND FILTERING
+        // =============================================
+        function renderBooks(filter = 'all') {
+            domElements.booksGrid.innerHTML = '';
+            
+            const filteredBooks = books.filter(book => {
+                if (filter === 'all') return true;
+                return book.category === filter;
+            });
+            
+            filteredBooks.forEach(book => {
+                const bookCard = createBookCard(book);
+                domElements.booksGrid.appendChild(bookCard);
+            });
+        }
+
+        function createBookCard(book) {
+    const card = document.createElement('div');
+    card.className = 'book-card';
+    card.dataset.id = book.id;
+    card.dataset.category = book.category;
+    
+    const isPreorder = preorderActive && book.preorderPrice;
+    const currentPrice = isPreorder ? book.preorderPrice : book.price;
+    const discountPercentage = isPreorder ? Math.round((book.price - book.preorderPrice) / book.price * 100) : 0;
+    
+    card.innerHTML = `
+        <div class="book-image">
+            <img src="${book.image}" alt="${book.title}" style="width: 100%; height: 100%; object-fit: cover;">
+        </div>
+        <div class="book-details">
+            <h3 class="book-title">${book.title}</h3>
+            <p class="book-author">By ${book.author}</p>
+            <div class="book-price">
+                <span class="current-price">₦${currentPrice.toLocaleString()}</span>
+                ${isPreorder ? `<span class="original-price">₦${book.price.toLocaleString()}</span>` : ''}
+                ${isPreorder ? `<span class="discount-badge">Save ${discountPercentage}%</span>` : ''}
+            </div>
+            <div class="book-actions">
+                <button class="add-to-cart" data-id="${book.id}">
+                    <i class="fas fa-cart-plus"></i> Add to Cart
+                </button>
+                <button class="quick-view" data-id="${book.id}">
+                    <i class="fas fa-eye"></i>
+                </button>
+            </div>
+        </div>
+    `;
+    
+    return card;
+}
+
+        // =============================================
+        // SHOPPING CART FUNCTIONALITY
+        // =============================================
+        function addToCart(bookId) {
+            const book = books.find(b => b.id === parseInt(bookId));
+            if (!book) return;
+            
+            const existingItem = cart.find(item => item.id === book.id);
+            
+            if (existingItem) {
+                existingItem.quantity += 1;
+            } else {
+                const price = preorderActive && book.preorderPrice ? book.preorderPrice : book.price;
+                cart.push({
+                    id: book.id,
+                    title: book.title,
+                    author: book.author,
+                    price: price,
+                    quantity: 1
+                });
+            }
+            
+            updateCart();
+            showToast('Item added to cart!', 'success');
+        }
+
+        function removeFromCart(bookId) {
+            cart = cart.filter(item => item.id !== parseInt(bookId));
+            updateCart();
+        }
+
+        function updateQuantity(bookId, change) {
+            const item = cart.find(item => item.id === parseInt(bookId));
+            if (!item) return;
+            
+            item.quantity += change;
+            
+            if (item.quantity < 1) {
+                removeFromCart(bookId);
+            } else {
+                updateCart();
+            }
+        }
+
+        function updateCart() {
+            // Save to localStorage
+            localStorage.setItem('aseries_cart', JSON.stringify(cart));
+            
+            // Update cart count
+            const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+            domElements.cartCount.textContent = totalItems;
+            domElements.mobileCartCount.textContent = totalItems;
+            
+            // Render cart items
+            renderCartItems();
+            
+            // Update cart total
+            const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            domElements.cartTotal.textContent = `₦${total.toLocaleString()}`;
+        }
+
+       function renderCartItems() {
+    domElements.cartItems.innerHTML = '';
+    
+    if (cart.length === 0) {
+        domElements.cartItems.innerHTML = `
+            <div class="empty-cart">
+                <i class="fas fa-shopping-cart"></i>
+                <p>Your cart is empty</p>
+                <a href="#books" class="btn btn-primary" style="margin-top: 1rem;">Browse Books</a>
+            </div>
+        `;
+        return;
+    }
+    
+    cart.forEach(item => {
+        const book = books.find(b => b.id === item.id);
+        const cartItem = document.createElement('div');
+        cartItem.className = 'cart-item';
+        cartItem.innerHTML = `
+            <div class="cart-item-image">
+                <img src="${book.image}" alt="${item.title}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 6px;">
+            </div>
+            <div class="cart-item-details">
+                <h4 class="cart-item-title">${item.title}</h4>
+                <p class="cart-item-author">By ${item.author}</p>
+                <p class="cart-item-price">₦${item.price.toLocaleString()}</p>
+                <div class="cart-item-actions">
+                    <div class="quantity-btn decrease" data-id="${item.id}">
+                        <i class="fas fa-minus"></i>
+                    </div>
+                    <span class="quantity-value">${item.quantity}</span>
+                    <div class="quantity-btn increase" data-id="${item.id}">
+                        <i class="fas fa-plus"></i>
+                    </div>
+                    <div class="remove-item" data-id="${item.id}">
+                        <i class="fas fa-trash"></i> Remove
+                    </div>
+                </div>
+            </div>
+        `;
+        domElements.cartItems.appendChild(cartItem);
+    });
+}
+
+        function getCartTotal() {
+            return cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+        }
+
+        // =============================================
+        // WHATSAPP ORDER FUNCTIONALITY WITH SUPABASE
+        // =============================================
+       async function sendWhatsAppOrder() {
+    if (cart.length === 0) {
+        showToast('Your cart is empty', 'error');
+        return;
+    }
+    
+    const phoneNumber = '2349169384267';
+    const orderNumber = generateOrderNumber();
+    
+    try {
+        // First save to Supabase
+        const savedOrder = await saveOrderToSupabase(orderNumber);
+        console.log('Order saved to Supabase:', savedOrder);
+        
+        // If successful, proceed with WhatsApp
+        let message = `Hello A-SERIES Publishing! I would like to place an order:\n\n`;
+        message += `Order Number: ${orderNumber}\n\n`;
+        
+        cart.forEach(item => {
+            message += `• ${item.title} (Qty: ${item.quantity}) - ₦${item.price.toLocaleString()} each\n`;
+        });
+        
+        message += `\nTotal: ₦${getCartTotal().toLocaleString()}\n\n`;
+        message += `Please confirm my order and provide delivery details.`;
+        
+        // Encode message for URL
+        const encodedMessage = encodeURIComponent(message);
+        const whatsappURL = `https://wa.me/${phoneNumber}?text=${encodedMessage}`;
+        
+        // Open in new tab
+        window.open(whatsappURL, '_blank');
+        
+        // Show success modal
+        showSuccessModal(orderNumber);
+        
+        // Clear cart
+        cart = [];
+        updateCart();
+        
+    } catch (error) {
+        console.error('Error in order process:', error);
+        showToast('Error processing order. Please try again.', 'error');
+    }
+}
+
+async function saveOrderToSupabase(orderNumber) {
+    try {
+        // Prepare order data
+        const orderData = {
+            order_number: orderNumber,
+            items: cart,
+            total_amount: getCartTotal(),
+            status: 'pending',
+            created_at: new Date().toISOString()
+        };
+
+        console.log('Saving order data:', orderData);
+
+        const { data, error } = await supabase
+            .from('orders')
+            .insert([orderData])
+            .select();
+
+        if (error) {
+            console.error('Supabase error details:', error);
+            throw new Error(`Database error: ${error.message}`);
+        }
+
+        if (!data || data.length === 0) {
+            throw new Error('No data returned from Supabase');
+        }
+
+        console.log('Order saved successfully:', data[0]);
+        return data[0];
+        
+    } catch (error) {
+        console.error('Error in saveOrderToSupabase:', error);
+        throw error;
+    }
+}
+
+        async function saveOrderToSupabase(orderNumber) {
+            try {
+                const { data, error } = await supabase
+                    .from('orders')
+                    .insert([
+                        {
+                            order_number: orderNumber,
+                            items: cart,
+                            total_amount: getCartTotal(),
+                            status: 'pending',
+                            created_at: new Date().toISOString()
+                        }
+                    ])
+                    .select();
+
+                if (error) {
+                    throw error;
+                }
+
+                console.log('Order saved to Supabase:', data);
+                return data;
+            } catch (error) {
+                console.error('Supabase error:', error);
+                throw error;
+            }
+        }
+
+        function generateOrderNumber() {
+            const now = new Date();
+            const dateStr = now.toISOString().slice(0, 10).replace(/-/g, '');
+            const timeStr = now.getTime().toString().slice(-4);
+            return `ORD-${dateStr}-${timeStr}`;
+        }
+
+        function showSuccessModal(orderNumber) {
+            domElements.orderNumber.textContent = orderNumber;
+            showModal(domElements.successModal);
+        }
+
+        // =============================================
+        // UTILITY FUNCTIONS
+        // =============================================
+        function showModal(modal) {
+            modal.classList.add('active');
+            domElements.overlay.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function hideModal(modal) {
+            modal.classList.remove('active');
+            domElements.overlay.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        function showToast(message, type = 'success') {
+            domElements.toastMessage.textContent = message;
+            domElements.toast.className = `toast ${type}`;
+            domElements.toast.classList.add('active');
+            
+            setTimeout(() => {
+                domElements.toast.classList.remove('active');
+            }, 3000);
+        }
+
+        // =============================================
+        // EVENT LISTENERS
+        // =============================================
+        function initializeEventListeners() {
+            // Mobile menu toggle
+            domElements.mobileMenuBtn.addEventListener('click', function() {
+                domElements.navLinks.classList.toggle('active');
+            });
+            
+            // Cart toggle
+            domElements.cartIcon.addEventListener('click', function() {
+                domElements.cartSidebar.classList.add('active');
+                domElements.overlay.classList.add('active');
+            });
+            
+            domElements.mobileCartBtn.addEventListener('click', function() {
+                domElements.cartSidebar.classList.add('active');
+                domElements.overlay.classList.add('active');
+            });
+            
+            domElements.closeCart.addEventListener('click', function() {
+                domElements.cartSidebar.classList.remove('active');
+                domElements.overlay.classList.remove('active');
+            });
+            
+            // Overlay click to close modals
+            domElements.overlay.addEventListener('click', function() {
+                domElements.cartSidebar.classList.remove('active');
+                hideModal(domElements.successModal);
+                domElements.navLinks.classList.remove('active');
+            });
+            
+            // Book filtering
+            domElements.filterBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    domElements.filterBtns.forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    renderBooks(this.dataset.filter);
+                });
+            });
+            
+            // Add to cart buttons (delegated)
+            document.addEventListener('click', function(e) {
+                if (e.target.closest('.add-to-cart')) {
+                    const bookId = e.target.closest('.add-to-cart').dataset.id;
+                    addToCart(bookId);
+                }
+                
+                if (e.target.closest('.quick-view')) {
+                    // Quick view functionality could be implemented here
+                    showToast('Quick view feature coming soon!', 'success');
+                }
+            });
+            
+            // Cart item actions (delegated)
+            domElements.cartItems.addEventListener('click', function(e) {
+                if (e.target.closest('.increase')) {
+                    const bookId = e.target.closest('.increase').dataset.id;
+                    updateQuantity(bookId, 1);
+                }
+                
+                if (e.target.closest('.decrease')) {
+                    const bookId = e.target.closest('.decrease').dataset.id;
+                    updateQuantity(bookId, -1);
+                }
+                
+                if (e.target.closest('.remove-item')) {
+                    const bookId = e.target.closest('.remove-item').dataset.id;
+                    removeFromCart(bookId);
+                }
+            });
+            
+            // FAQ toggle
+            domElements.faqQuestions.forEach(question => {
+                question.addEventListener('click', function() {
+                    const answer = this.nextElementSibling;
+                    const toggle = this.querySelector('.faq-toggle');
+                    
+                    answer.classList.toggle('active');
+                    toggle.classList.toggle('active');
+                });
+            });
+            
+            // WhatsApp order button
+            domElements.whatsappBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                sendWhatsAppOrder();
+            });
+            
+            // Modal controls
+            domElements.closeSuccessModal.addEventListener('click', function() {
+                hideModal(domElements.successModal);
+            });
+            
+            domElements.closeSuccessBtn.addEventListener('click', function() {
+                hideModal(domElements.successModal);
+            });
+            
+            // Back to top button
+            domElements.backToTop.addEventListener('click', function() {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+            
+            // Header scroll effect
+            window.addEventListener('scroll', function() {
+                // Header background on scroll
+                if (window.scrollY > 50) {
+                    domElements.header.classList.add('header-scrolled');
+                } else {
+                    domElements.header.classList.remove('header-scrolled');
+                }
+                
+                // Back to top button visibility
+                if (window.scrollY > 300) {
+                    domElements.backToTop.classList.add('active');
+                } else {
+                    domElements.backToTop.classList.remove('active');
+                }
+            });
+            
+            // Smooth scrolling for anchor links
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    const targetId = this.getAttribute('href');
+                    if (targetId === '#') return;
+                    
+                    const targetElement = document.querySelector(targetId);
+                    if (targetElement) {
+                        targetElement.scrollIntoView({ behavior: 'smooth' });
+                        
+                        // Close mobile menu if open
+                        domElements.navLinks.classList.remove('active');
+                    }
+                });
+            });
+        }
+    </script>
+</body>
+</html>
